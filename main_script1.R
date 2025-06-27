@@ -40,7 +40,7 @@ results_150 <- data.frame(
 for (i in 1:100) {
   set.seed(400+i)
   obs_gen_para <- c(gamma = 0.3, d = 5, noPoints = 150)
-  result <- MACS_Alg_C(obs_gen_para, alpha = 0.5 , lambda)
+  result <- TACS_Alg_C(obs_gen_para, alpha = 0.5 , lambda)
   
   results_150[i, ] <- list(
     Run = i,
@@ -70,7 +70,7 @@ results_175 <- data.frame(
 for (i in 1:100) {
   set.seed(400+i)
   obs_gen_para <- c(gamma = 0.3, d = 5, noPoints = 175)
-  result <- MACS_Alg_C(obs_gen_para, alpha = 0.5, lambda)
+  result <- TACS_Alg_C(obs_gen_para, alpha = 0.5, lambda)
   
   results_175[i, ] <- list(
     Run = i,
