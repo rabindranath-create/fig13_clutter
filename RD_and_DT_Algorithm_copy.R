@@ -316,6 +316,17 @@ Update_graph_intersect_RD<-function(g,x,y,circle_info,r){
 #}
 
 
+x <- 100; y <- 100; r <- 4.5
+# begin the loop to travel from s to t
+s <- 10151
+t <- 152
+# create graph
+vertice_list <- Lattice_Vertices(x,y)
+#list of coordinates 
+G_original <- Graph_Discretized(x,y)
+
+
+
 
 
 #result_obs_gen_para <- RD_Alg(c(0.3, 5, 25))
@@ -328,14 +339,7 @@ RD_Alg_C <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
   #gamma, d, nopoints, lambda, (cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  #list of coordinates 
-  G_original <- Graph_Discretized(x,y)
+  
   #Make igraph graph object
   output_Ginfo <- Update_graph_intersect_RD(G_original, x, y, obs_info, r)
   # output_Ginto <- list(G_info=updateg, Int_info=int_info)
@@ -447,13 +451,7 @@ RD_Alg_C <- function(obs_gen_para, lambda, cost = 5){
 RD_Alg_O <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_RD(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -539,13 +537,7 @@ RD_Alg_O <- function(obs_gen_para, lambda, cost = 5){
 RD_Alg_M <- function(obs_gen_para, lambda, cost = 5 ){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4],obs_gen_para[5], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_RD(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -662,13 +654,7 @@ Update_graph_intersect_DT<-function(g,x,y,circle_info,r){
 DT_Alg_C <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph - based on W
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_DT(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -755,13 +741,7 @@ DT_Alg_C <- function(obs_gen_para, lambda, cost = 5){
 DT_Alg_O <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph - based on W
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_DT(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -848,13 +828,7 @@ DT_Alg_O <- function(obs_gen_para, lambda, cost = 5){
 DT_Alg_M <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4],obs_gen_para[5], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph - based on W
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_DT(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -973,13 +947,7 @@ Update_graph_intersect_AP<-function(g,x,y,circle_info,r){
 AP_Alg_C <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_AP(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1067,13 +1035,7 @@ AP_Alg_C <- function(obs_gen_para, lambda, cost = 5){
 AP_Alg_O <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_AP(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1159,13 +1121,7 @@ AP_Alg_O <- function(obs_gen_para, lambda, cost = 5){
 AP_Alg_M <- function(obs_gen_para, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4],obs_gen_para[5], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_AP(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1294,13 +1250,7 @@ Update_graph_intersect_ACS<-function(g,x,y,circle_info,r, kei){
 ACS_Alg_C <- function(obs_gen_para, kei, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_ACS(G_original, x, y, obs_info, r, kei)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1388,13 +1338,7 @@ ACS_Alg_C <- function(obs_gen_para, kei, lambda, cost = 5){
 ACS_Alg_O <- function(obs_gen_para, kei, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_ACS(G_original, x, y, obs_info, r, kei)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1480,13 +1424,7 @@ ACS_Alg_O <- function(obs_gen_para, kei, lambda, cost = 5){
 ACS_Alg_M <- function(obs_gen_para, kei, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4],obs_gen_para[5], lambda, cost )
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_ACS(G_original, x, y, obs_info, r, kei)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1626,13 +1564,7 @@ Update_graph_intersect_ZR<-function(g,x,y,circle_info,r){
 ZR_Alg <- function(obs_gen_para, lambda = 2, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+ 
   output_Ginfo <- Update_graph_intersect_ZR(G_original, x, y, obs_info, r)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1755,14 +1687,7 @@ Update_graph_intersect_TACS<-function(g,x,y,circle_info, r, alpha, z_0){
 TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  z_0 <- ZR_Alg(obs_gen_para, lambda, cost)$Length_total
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1864,14 +1789,7 @@ TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
 TACS_Alg_O <- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  z_0 <- ZR_Alg(obs_gen_para, lambda, cost)$Length_total
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1974,14 +1892,7 @@ TACS_Alg_O <- function(obs_gen_para, alpha, lambda, cost = 5){
 TACS_Alg_M<- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4], obs_gen_para[5], lambda, cost)
-  x <- 100; y <- 100; r <- 4.5
-  # begin the loop to travel from s to t
-  s <- 10151
-  t <- 152
-  # create graph
-  z_0 <- ZR_Alg(obs_gen_para, lambda, cost)$Length_total
-  vertice_list <- Lattice_Vertices(x,y)
-  G_original <- Graph_Discretized(x,y)
+  
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
