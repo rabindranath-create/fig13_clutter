@@ -1687,7 +1687,7 @@ Update_graph_intersect_TACS<-function(g,x,y,circle_info, r, alpha, z_0){
 TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  z_0 <- ZR_Alg(obs_info, lambda, cost)
+  z_0 <- ZR_Alg(obs_info, lambda, cost)$Length_total
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1789,7 +1789,7 @@ TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
 TACS_Alg_O <- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
-  z_0 <- ZR_Alg(obs_info, lambda, cost)
+  z_0 <- ZR_Alg(obs_info, lambda, cost)$Length_total
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
@@ -1893,7 +1893,7 @@ TACS_Alg_M<- function(obs_gen_para, alpha, lambda, cost = 5){
   # generate obstacle info
   obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4], obs_gen_para[5], lambda, cost)
   
-  z_0 <- ZR_Alg(obs_info[1:3], lambda, cost)
+  z_0 <- ZR_Alg(obs_info[1:3], lambda, cost)$Length_total
   output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
   G_ed <- output_Ginfo$G_info
   Int_info <- output_Ginfo$Int_info
