@@ -1741,7 +1741,7 @@ TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
           df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- Inf
         } else{
           # adjust based on false obstacle
-          if(obs_info[obs_ind_temp,4] < alpha){
+          if(obs_info$prob[obs_ind_temp] < alpha){
           df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
                                                                     0.5*( obs_info[obs_ind_temp,3] ) )
           #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
@@ -1765,7 +1765,7 @@ TACS_Alg_C <- function(obs_gen_para, alpha, lambda, cost = 5){
           df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
         } else{
           # false obstacle
-          if(obs_info[obs_ind_temp,4] < alpha){
+          if(obs_info[obs_ind_temp2,4] < alpha){
             df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
                                                                       0.5*( obs_info[obs_ind_temp2,3] ) )
             #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
@@ -1867,7 +1867,7 @@ TACS_Alg_O <- function(obs_gen_para, alpha, lambda, cost = 5){
           df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
         } else{
           # false obstacle
-          if(obs_info[obs_ind_temp,4] < alpha){
+          if(obs_info[obs_ind_temp2,4] < alpha){
             df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
                                                                        0.5*( obs_info[obs_ind_temp2,3] ) )
             #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
@@ -1972,6 +1972,158 @@ TACS_Alg_M<- function(obs_gen_para, alpha, lambda, cost = 5){
           df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
         } else{
           # false obstacle
+          if(obs_info[obs_ind_temp2,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] + ( 1-obs_info[obs_ind_temp2,4])^
+                                                                               (-( log(z_0 - obs_info[obs_ind_temp2,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp2]==1),obs_ind_temp2] <- 0
+        }
+      }
+      
+      G_ed <- graph_from_data_frame(df_edge_ed,directed = F)
+    }
+  }
+  return(output_final)
+}
+
+
+
+
+
+
+
+################
+#MACS
+#######
+#Main algorithm - ACS 
+Update_graph_intersect_MACS<-function(g,x,y,circle_info, r, kappa, z_0){
+  #read circle center x,y coordinate c-cost,p-prabability,True or False Obstacles
+  #circles=read.csv("example1.csv",header=FALSE)
+  n <- nrow(circle_info)
+  elg <- as_data_frame(g,what="edges")
+  colnames(elg) <- c("From","To","Cost")
+  int_info <- matrix(0,ncol=nrow(circle_info),nrow=nrow(elg))
+  for(i in 1:n){
+    el<-Intersect_Obs(t(circle_info[i,1:2]),r,x,y)
+    n1=nrow(el)
+    for(k in 1:n1){el[k,]<-sort(el[k,],decreasing=FALSE)} #sort the elements
+    
+    for(j in 1:n1){
+      index=which((elg[,1]==el[j,1] & elg[,2]==el[j,2]))
+      #elg[index,3] <- elg[index,3]+0.5*circle_info[i,3]/(1-circle_info[i,4])
+      if(circle_info[i, 4] < alpha ){
+        elg[index,3] <- elg[index,3]+0.5*( circle_info[i,3])
+      }
+      else{
+        elg[index,3] <- elg[index,3]+0.5*( circle_info[i,3] + (1 - circle_info[i,4])^(-( log(z_0 - circle_info[i,3]) )/ ( log(1/(1-alpha)) ) )  ) 
+      }
+      int_info[index, i] <- 1
+    }#inner loop
+  }#outer loop
+  
+  updateg=graph_from_data_frame(elg,directed=0)
+  output <- list(G_info=updateg, Int_info=int_info)
+  return(output)
+}
+
+
+M <- 20 
+I <- seq(0, 1, length.out = M + 1)
+
+
+# 2. RD algorithm - input is the parameters of obstacle pattern (for clutter only)
+MACS_Alg_C <- function(obs_gen_para, kappa, lambda, cost = 5){
+  # generate obstacle info
+  
+  KK <- seq(0, 2 * kappa, length.out = M + 1)
+  obs_info <- Clutter_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
+  p_mean <- mean(obs_info[, 4])
+  ii <- which(I[1:M] < p & p < I[2:(M+1)]) - 1
+  KK[2: ceiling((M+1)/2)] <- KK[2: ceiling((M+1)/2)] + (ii-11) * (kappa/10)
+  KK[ceiling((M+1)/2) + 1, M+1] <- KK[ceiling((M+1)/2) + 1, M+1]  + (ii-11) * (kappa/10)
+  
+  output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
+  G_ed <- output_Ginfo$G_info
+  Int_info <- output_Ginfo$Int_info
+  df_edge_ed <- as_data_frame(G_ed, what="edges")
+  # some record vectors
+  length_total <- 0 # record Euclidean length
+  cost_total <- 0 # record disambiguation cost 
+  reach_t <- F
+  path_record <- s
+  D_record <- c()
+  while(reach_t!=T){
+    # implement shortest path algorithm
+    output <- shortest_paths(G_ed,
+                             which(vertex.attributes(G_ed)$name==as.character(s)),
+                             which(vertex.attributes(G_ed)$name==as.character(t)),
+                             weights=df_edge_ed$Cost, output="both",algorithm="dijkstra")
+    V_list <- c(as.numeric(attributes(output$vpath[[1]])$names))
+    # follow the path until the disambiguation state
+    for (i in 2:length(V_list)){
+      edge_ind_temp <- which(df_edge_ed$from==min(V_list[(i-1):i])&df_edge_ed$to==max(V_list[(i-1):i]))
+      edge_length <- Dist_Euclidean(as.numeric(vertice_list[V_list[i-1],1:2]),as.numeric(vertice_list[V_list[i],1:2]))
+      if (sum(Int_info[edge_ind_temp,])!=0){
+        D_state <- V_list[i-1]
+        D_record <- c(D_record, D_state)
+        break
+      } else{
+        length_total <- length_total+edge_length
+        path_record <- c(path_record,V_list[i])
+        D_state <- NULL
+      }
+    }
+    if(is.null(D_state)){
+      # if didn't run into any obstacle and reach target
+      reach_t=T
+      output_final <- list(Length_total=length_total,
+                           Cost_total=cost_total,Disambiguate_state=D_record)
+    } else{
+      # run into obstacle
+      # update start to current disambiguation state
+      # subtract one disambiguation 
+      reach_t=F
+      s <- D_state
+      # adjust graph
+      # determine which obstacle
+      obs_ind_temp <- which(Int_info[edge_ind_temp,]==1)
+      if (length(obs_ind_temp)==1){
+        # add cost of disambiguation
+        cost_total <- cost_total+obs_info[obs_ind_temp,3]
+        if(obs_info$status[obs_ind_temp]==1){
+          # adjust based on true obstalce
+          df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- Inf
+        } else{
+          # adjust based on false obstacle
+          if(obs_info[obs_ind_temp,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] + ( 1-obs_info[obs_ind_temp,4])^
+                                                                              (-( log(z_0 - obs_info[obs_ind_temp,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp]==1),obs_ind_temp] <- 0 
+        }
+      } else{
+        dist_temp <- rep(0,length(obs_ind_temp))
+        for(i in 1:length(obs_ind_temp)){
+          dist_temp[i] <- Dist_Euclidean(as.numeric(vertice_list[D_state,1:2]),obs_info[obs_ind_temp[i],1:2])
+        }
+        obs_ind_temp2 <- obs_ind_temp[which.min(dist_temp)]
+        # add cost of disambiguation
+        cost_total <- cost_total + obs_info[obs_ind_temp2,3]
+        if (obs_info$status[obs_ind_temp2]==1){
+          # true obstacle
+          df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
+        } else{
+          # false obstacle
           if(obs_info[obs_ind_temp,4] < alpha){
             df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
                                                                        0.5*( obs_info[obs_ind_temp2,3] ) )
@@ -1990,4 +2142,212 @@ TACS_Alg_M<- function(obs_gen_para, alpha, lambda, cost = 5){
   }
   return(output_final)
 }
+
+
+# 2. RD algorithm - input is the parameters of obstacle pattern (for clutter only)
+MACS_Alg_O <- function(obs_gen_para, kappa, lambda, cost = 5){
+  # generate obstacle info
+  obs_info <- Obstacle_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3], lambda, cost)
+  z_0 <- ZR_Alg(obs_gen_para, lambda, cost)$Length_total
+  output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
+  G_ed <- output_Ginfo$G_info
+  Int_info <- output_Ginfo$Int_info
+  df_edge_ed <- as_data_frame(G_ed, what="edges")
+  # some record vectors
+  length_total <- 0 # record Euclidean length
+  cost_total <- 0 # record disambiguation cost 
+  reach_t <- F
+  path_record <- s
+  D_record <- c()
+  while(reach_t!=T){
+    # implement shortest path algorithm
+    output <- shortest_paths(G_ed,
+                             which(vertex.attributes(G_ed)$name==as.character(s)),
+                             which(vertex.attributes(G_ed)$name==as.character(t)),
+                             weights=df_edge_ed$Cost, output="both",algorithm="dijkstra")
+    V_list <- c(as.numeric(attributes(output$vpath[[1]])$names))
+    # follow the path until the disambiguation state
+    for (i in 2:length(V_list)){
+      edge_ind_temp <- which(df_edge_ed$from==min(V_list[(i-1):i])&df_edge_ed$to==max(V_list[(i-1):i]))
+      edge_length <- Dist_Euclidean(as.numeric(vertice_list[V_list[i-1],1:2]),as.numeric(vertice_list[V_list[i],1:2]))
+      if (sum(Int_info[edge_ind_temp,])!=0){
+        D_state <- V_list[i-1]
+        D_record <- c(D_record, D_state)
+        break
+      } else{
+        length_total <- length_total+edge_length
+        path_record <- c(path_record,V_list[i])
+        D_state <- NULL
+      }
+    }
+    if(is.null(D_state)){
+      # if didn't run into any obstacle and reach target
+      reach_t=T
+      output_final <- list(Length_total=length_total,
+                           Cost_total=cost_total,Disambiguate_state=D_record)
+    } else{
+      # run into obstacle
+      # update start to current disambiguation state
+      # subtract one disambiguation 
+      reach_t=F
+      s <- D_state
+      # adjust graph
+      # determine which obstacle
+      obs_ind_temp <- which(Int_info[edge_ind_temp,]==1)
+      if (length(obs_ind_temp)==1){
+        # add cost of disambiguation
+        cost_total <- cost_total+obs_info[obs_ind_temp,3]
+        if(obs_info$status[obs_ind_temp]==1){
+          # adjust based on true obstalce
+          df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- Inf
+        } else{
+          # adjust based on false obstacle
+          if(obs_info[obs_ind_temp,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] + ( 1-obs_info[obs_ind_temp,4])^
+                                                                              (-( log(z_0 - obs_info[obs_ind_temp,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp]==1),obs_ind_temp] <- 0 
+        }
+      } else{
+        dist_temp <- rep(0,length(obs_ind_temp))
+        for(i in 1:length(obs_ind_temp)){
+          dist_temp[i] <- Dist_Euclidean(as.numeric(vertice_list[D_state,1:2]),obs_info[obs_ind_temp[i],1:2])
+        }
+        obs_ind_temp2 <- obs_ind_temp[which.min(dist_temp)]
+        # add cost of disambiguation
+        cost_total <- cost_total + obs_info[obs_ind_temp2,3]
+        if (obs_info$status[obs_ind_temp2]==1){
+          # true obstacle
+          df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
+        } else{
+          # false obstacle
+          if(obs_info[obs_ind_temp,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] + ( 1-obs_info[obs_ind_temp2,4])^
+                                                                               (-( log(z_0 - obs_info[obs_ind_temp2,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp2]==1),obs_ind_temp2] <- 0
+        }
+      }
+      
+      G_ed <- graph_from_data_frame(df_edge_ed,directed = F)
+    }
+  }
+  return(output_final)
+}
+
+
+
+# 2. RD algorithm - input is the parameters of obstacle pattern (for clutter only)
+MACS_Alg_M<- function(obs_gen_para, kappa, lambda, cost = 5){
+  # generate obstacle info
+  obs_info <- Mix_gen(obs_gen_para[1],obs_gen_para[2],obs_gen_para[3],obs_gen_para[4], obs_gen_para[5], lambda, cost)
+  
+  z_0 <- ZR_Alg(obs_gen_para[1:3], lambda, cost)$Length_total
+  #z_0 <- ZR_Alg(obs_info[1:3], lambda, cost)$Length_total
+  output_Ginfo <- Update_graph_intersect_TACS(G_original, x, y, obs_info, r, alpha, z_0)
+  G_ed <- output_Ginfo$G_info
+  Int_info <- output_Ginfo$Int_info
+  df_edge_ed <- as_data_frame(G_ed, what="edges")
+  # some record vectors
+  length_total <- 0 # record Euclidean length
+  cost_total <- 0 # record disambiguation cost 
+  reach_t <- F
+  path_record <- s
+  D_record <- c()
+  while(reach_t!=T){
+    # implement shortest path algorithm
+    output <- shortest_paths(G_ed,
+                             which(vertex.attributes(G_ed)$name==as.character(s)),
+                             which(vertex.attributes(G_ed)$name==as.character(t)),
+                             weights=df_edge_ed$Cost, output="both",algorithm="dijkstra")
+    V_list <- c(as.numeric(attributes(output$vpath[[1]])$names))
+    # follow the path until the disambiguation state
+    for (i in 2:length(V_list)){
+      edge_ind_temp <- which(df_edge_ed$from==min(V_list[(i-1):i])&df_edge_ed$to==max(V_list[(i-1):i]))
+      edge_length <- Dist_Euclidean(as.numeric(vertice_list[V_list[i-1],1:2]),as.numeric(vertice_list[V_list[i],1:2]))
+      if (sum(Int_info[edge_ind_temp,])!=0){
+        D_state <- V_list[i-1]
+        D_record <- c(D_record, D_state)
+        break
+      } else{
+        length_total <- length_total+edge_length
+        path_record <- c(path_record,V_list[i])
+        D_state <- NULL
+      }
+    }
+    if(is.null(D_state)){
+      # if didn't run into any obstacle and reach target
+      reach_t=T
+      output_final <- list(Length_total=length_total,
+                           Cost_total=cost_total,Disambiguate_state=D_record)
+    } else{
+      # run into obstacle
+      # update start to current disambiguation state
+      # subtract one disambiguation 
+      reach_t=F
+      s <- D_state
+      # adjust graph
+      # determine which obstacle
+      obs_ind_temp <- which(Int_info[edge_ind_temp,]==1)
+      if (length(obs_ind_temp)==1){
+        # add cost of disambiguation
+        cost_total <- cost_total+obs_info[obs_ind_temp,3]
+        if(obs_info$status[obs_ind_temp]==1){
+          # adjust based on true obstalce
+          df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- Inf
+        } else{
+          # adjust based on false obstacle
+          if(obs_info[obs_ind_temp,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp]==1),3]-
+                                                                      0.5*( obs_info[obs_ind_temp,3] + ( 1-obs_info[obs_ind_temp,4])^
+                                                                              (-( log(z_0 - obs_info[obs_ind_temp,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp]==1),obs_ind_temp] <- 0 
+        }
+      } else{
+        dist_temp <- rep(0,length(obs_ind_temp))
+        for(i in 1:length(obs_ind_temp)){
+          dist_temp[i] <- Dist_Euclidean(as.numeric(vertice_list[D_state,1:2]),obs_info[obs_ind_temp[i],1:2])
+        }
+        obs_ind_temp2 <- obs_ind_temp[which.min(dist_temp)]
+        # add cost of disambiguation
+        cost_total <- cost_total + obs_info[obs_ind_temp2,3]
+        if (obs_info$status[obs_ind_temp2]==1){
+          # true obstacle
+          df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- Inf
+        } else{
+          # false obstacle
+          if(obs_info[obs_ind_temp,4] < alpha){
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] ) )
+            #0.5*obs_info[obs_ind_temp,3]/(1-obs_info[obs_ind_temp,4])
+          } else{
+            df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3] <- pmax(0, df_edge_ed[which(Int_info[,obs_ind_temp2]==1),3]-
+                                                                       0.5*( obs_info[obs_ind_temp2,3] + ( 1-obs_info[obs_ind_temp2,4])^
+                                                                               (-( log(z_0 - obs_info[obs_ind_temp2,3]) )/ ( log(1/(1-alpha)) ) )   ) )
+          }
+          Int_info[which(Int_info[,obs_ind_temp2]==1),obs_ind_temp2] <- 0
+        }
+      }
+      
+      G_ed <- graph_from_data_frame(df_edge_ed,directed = F)
+    }
+  }
+  return(output_final)
+}
+
 
