@@ -44,7 +44,7 @@ for (i in 1:100) {
   
   results_50[i, ] <- list(
     Run = i,
-    N_c = 150,
+    N_c = 50,
     Length = result$Length_total,
     Cost = result$Cost_total,
     NumDisambigs = length(result$Disambiguate_state)
@@ -74,7 +74,7 @@ for (i in 1:100) {
   
   results_75[i, ] <- list(
     Run = i,
-    N_c = 175,
+    N_c = 75,
     Length = result$Length_total,
     Cost = result$Cost_total,
     NumDisambigs = length(result$Disambiguate_state)
